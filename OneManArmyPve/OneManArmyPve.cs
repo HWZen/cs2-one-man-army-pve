@@ -31,7 +31,7 @@ public class OneManArmyPve : BasePlugin
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
     }
 
-    [ConsoleCommand("oma_enable", "Enable One-Man-Army PvE mode: oma_enable [t|ct]")]
+    [ConsoleCommand("oma", "Enable One-Man-Army PvE mode: oma [t|ct]")]
     [CommandHelper(minArgs: 0, usage: "[t|ct]", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
     public void OnEnable(CCSPlayerController? caller, CommandInfo command)
     {

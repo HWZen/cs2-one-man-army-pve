@@ -14,7 +14,7 @@ English and Chinese bilingual README for the standalone CounterStrikeSharp plugi
 - Human: 1000 HP, 400 armor, helmet enabled
 - Bots: 100 HP
 - Competitive rules with halftime side switch, first to 13, overtime enabled
-- `oma_enable` also enables `sv_infinite_ammo 2`
+- `oma` also enables `sv_infinite_ammo 2`
 
 **中文**
 
@@ -24,7 +24,7 @@ English and Chinese bilingual README for the standalone CounterStrikeSharp plugi
 - 真人：1000 血、400 护甲、自动有头甲
 - 人机：100 血
 - 竞技模式规则：12 局后换边、先到 13 胜、允许加时
-- 执行 `oma_enable` 时会同时开启 `sv_infinite_ammo 2`
+- 执行 `oma` 时会同时开启 `sv_infinite_ammo 2`
 
 ## Quick Start for Players / 普通用户使用教程
 
@@ -129,6 +129,6 @@ DeployTool/bin/Debug/net10.0-windows/DeployTool.exe
 
 ## Commands / 命令
 
-- `oma_enable [t|ct]` - enable mode and optionally set initial side / 开启模式并可选设置初始阵营
+- `oma [t|ct]` - enable mode and optionally set initial side / 开启模式并可选设置初始阵营
 - `oma_disable` - disable mode / 关闭模式
 - `oma_status` - show current mode status / 查看当前模式状态

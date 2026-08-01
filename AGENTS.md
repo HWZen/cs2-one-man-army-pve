@@ -31,6 +31,6 @@ The GUI then installs to `<CS2>\game\csgo\addons\counterstrikesharp\plugins\OneM
 
 ## Plugin notes
 
-- Console commands `oma_enable [t|ct]`, `oma_disable`, `oma_status` are the plugin's public entrypoints (`OneManArmyPve.cs`).
+- Console commands `oma [t|ct]`, `oma_disable`, `oma_status` are the plugin's public entrypoints (`OneManArmyPve.cs`).
 - `Load(bool hotReload)` supports hot reload.
 - Health/armor is applied via `Utilities.SetStateChanged` with hardcoded CS2 schema names (`CBaseEntity`/`m_iHealth`, `CCSPlayerPawn`/`m_ArmorValue`) that can break across game updates. The empty `catch { }` blocks around pawn/item access are **intentional** (keep the plugin running across schema/runtime mismatches), not bugs to fix.
