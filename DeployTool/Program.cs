@@ -43,10 +43,15 @@ internal sealed class MainForm : Form
         AllowTrailingCommas = true
     };
 
+    private const string WithBotsGameInfoPath = "backup\\WithBots\\gameinfo.gi";
+    private const string OnlineGameInfoPath = "backup\\Online\\gameinfo.gi";
+
     private readonly Button _installButton;
     private readonly Button _launchButton;
     private readonly TextBox _logBox;
     private readonly Label _statusLabel;
+
+    private Process? _runningCs2;
 
     public MainForm()
     {
@@ -109,6 +114,9 @@ internal sealed class MainForm : Form
         Controls.Add(_launchButton);
         Controls.Add(_logBox);
         Controls.Add(_statusLabel);
+
+        FormClosing += (_, _) => RestoreOnlineGameInfo();
+        SystemEvents.SessionEnding += (_, _) => RestoreOnlineGameInfo();
     }
 
     // ── 安装 ──────────────────────────────────────────────
@@ -339,7 +347,8 @@ internal sealed class MainForm : Form
 
     private void LaunchCs2()
     {
-        SetBusy(true);
+        UseWaitCursor = true;
+        _installButton.Enabled = false;
         try
         {
             string? cs2Path = FindCs2InstallPath();
@@ -356,6 +365,9 @@ internal sealed class MainForm : Form
                 return;
             }
 
+            if (!CopyGameInfo(cs2Path, WithBotsGameInfoPath, "启用 Bots", remindOnMissing: true))
+                return;
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = cs2Exe,
@@ -367,11 +379,18 @@ internal sealed class MainForm : Form
             Process? process = Process.Start(startInfo);
             if (process == null)
             {
+                CopyGameInfo(cs2Path, OnlineGameInfoPath, "恢复 Online");
                 ShowError("启动失败。请手动启动 CS2 并确保启动项包含 -insecure。");
                 return;
             }
 
-            _statusLabel.Text = "已启动 CS2（-insecure）";
+            _runningCs2 = process;
+            _launchButton.Enabled = false;
+            _launchButton.Text = "CS2 运行中...";
+            _statusLabel.Text = "已启动 CS2（-insecure），退出后自动恢复 gameinfo.gi";
+            Log("已启动 CS2（-insecure），退出后自动恢复 gameinfo.gi");
+
+            _ = Task.Run(() => WatchCs2AndRestore(process, cs2Path));
         }
         catch (Exception ex)
         {
@@ -379,7 +398,82 @@ internal sealed class MainForm : Form
         }
         finally
         {
-            SetBusy(false);
+            UseWaitCursor = false;
+            Cursor = Cursors.Default;
+            _installButton.Enabled = true;
+        }
+    }
+
+    // ── gameinfo.gi 切换 ──────────────────────────────────
+
+    private bool CopyGameInfo(string cs2Path, string relativePath, string action, bool remindOnMissing = false)
+    {
+        try
+        {
+            string source = Path.Combine(cs2Path, "game", "csgo", relativePath);
+            string dest = Path.Combine(cs2Path, "game", "csgo", "gameinfo.gi");
+            if (!File.Exists(source))
+            {
+                Log($"[{action}] 未找到源文件：{source}");
+                if (remindOnMissing)
+                {
+                    MessageBox.Show(this,
+                        $"未找到：{source}\n\nCS2BotImprover 可能尚未部署到 CS2 目录，请先点击“安装”按钮完成部署后再启动。",
+                        "未部署 CS2BotImprover", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                return false;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
+            File.Copy(source, dest, overwrite: true);
+            Log($"[{action}] 已写入 gameinfo.gi：{dest}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log($"[{action}] 写入 gameinfo.gi 失败：{ex.Message}");
+            return false;
+        }
+    }
+
+    private void RestoreOnlineGameInfo()
+    {
+        try
+        {
+            string? cs2Path = FindCs2InstallPath();
+            if (string.IsNullOrWhiteSpace(cs2Path)) return;
+            CopyGameInfo(cs2Path, OnlineGameInfoPath, "退出恢复 Online");
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
+    private void WatchCs2AndRestore(Process process, string cs2Path)
+    {
+        try
+        {
+            process.WaitForExit();
+        }
+        catch
+        {
+            // ignored
+        }
+        finally
+        {
+            process.Dispose();
+            if (ReferenceEquals(_runningCs2, process))
+                _runningCs2 = null;
+
+            CopyGameInfo(cs2Path, OnlineGameInfoPath, "恢复 Online");
+
+            InvokeIfNeeded(() =>
+            {
+                _launchButton.Enabled = true;
+                _launchButton.Text = "启动 CS2（-insecure）";
+                _statusLabel.Text = "CS2 已退出，已恢复 gameinfo.gi";
+            });
         }
     }
 
@@ -387,7 +481,22 @@ internal sealed class MainForm : Form
 
     private void Log(string message)
     {
-        _logBox.AppendText(message + Environment.NewLine);
+        if (IsDisposed || Disposing) return;
+        InvokeIfNeeded(() => _logBox.AppendText(message + Environment.NewLine));
+    }
+
+    private void InvokeIfNeeded(Action action)
+    {
+        if (IsDisposed || Disposing) return;
+        if (InvokeRequired)
+        {
+            try { BeginInvoke(action); }
+            catch { }
+        }
+        else
+        {
+            action();
+        }
     }
 
     private void SetBusy(bool busy)

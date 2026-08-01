@@ -31,6 +31,11 @@
     {
       "from": "OneManArmyPve.dll",
       "to": "game/csgo/addons/counterstrikesharp/plugins/OneManArmyPve/"
+    },
+    {
+      "from": "CS2BotImprover",
+      "to": "game/csgo/",
+      "recursive": true
     }
   ]
 }
