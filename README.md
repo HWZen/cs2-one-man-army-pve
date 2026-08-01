@@ -1,20 +1,100 @@
-# CS2-One-Man-Army-PVE
+# CS2-One-Man-Army-PVE / CS2-一人成军PVE
 
-中文名称：CS2-一人成军PVE
+English and Chinese bilingual README for the standalone CounterStrikeSharp plugin project.
 
-A standalone CounterStrikeSharp plugin project for a "one human vs 10 bots" competitive PvE mode in CS2.
+独立 CounterStrikeSharp 插件项目的中英双语说明文档。
 
-## Project Structure
+## Overview / 项目简介
 
-- `OneManArmyPve/OneManArmyPve.cs` - plugin source
-- `OneManArmyPve/OneManArmyPve.csproj` - .NET 10 plugin project
+**English**
 
-## Build
+`CS2-One-Man-Army-PVE` is a standalone CounterStrikeSharp plugin for a competitive PvE mode in CS2:
+
+- 1 human player vs 10 bots
+- Human: 1000 HP, 400 armor, helmet enabled
+- Bots: 100 HP
+- Competitive rules with halftime side switch, first to 13, overtime enabled
+- `oma_enable` also enables `sv_infinite_ammo 2`
+
+**中文**
+
+`CS2-一人成军PVE` 是一个独立的 CounterStrikeSharp 插件，用于在 CS2 中实现竞技规则下的 PVE 模式：
+
+- 1 名真人对战 10 名人机
+- 真人：1000 血、400 护甲、自动有头甲
+- 人机：100 血
+- 竞技模式规则：12 局后换边、先到 13 胜、允许加时
+- 执行 `oma_enable` 时会同时开启 `sv_infinite_ammo 2`
+
+## Project Structure / 项目结构
+
+- `OneManArmyPve/OneManArmyPve.cs` - plugin source / 插件源码
+- `OneManArmyPve/OneManArmyPve.csproj` - .NET 10 plugin project / .NET 10 插件工程
+- `DeployTool/Program.cs` - deploy helper (auto find CS2, copy DLL, optional launch) / 部署工具（自动找 CS2、复制 DLL、可选启动）
+- `DeployTool/DeployTool.csproj` - deploy tool project / 部署工具工程
+
+## Build / 编译
 
 ```powershell
 dotnet build "OneManArmyPve/OneManArmyPve.csproj"
 ```
 
-## Deploy
+## Deploy / 部署
 
-Copy `OneManArmyPve.dll` to your CS2 CounterStrikeSharp plugins directory.
+**English**
+
+Copy `OneManArmyPve.dll` to your CS2 CounterStrikeSharp plugins directory, then restart the server or reload plugins.
+
+**中文**
+
+将 `OneManArmyPve.dll` 复制到你的 CS2 CounterStrikeSharp 插件目录，然后重启服务器或重载插件。
+
+## Deploy Tool / 部署工具
+
+**English**
+
+Build deploy tool:
+
+```powershell
+dotnet build "DeployTool/DeployTool.csproj"
+```
+
+Then put the prebuilt `OneManArmyPve.dll` in the same folder as `DeployTool.exe` and run the GUI.
+
+The GUI has only two buttons:
+
+- `安装` (Install): detect CS2 path and copy DLL
+- `启动 CS2（-insecure）` (Launch): start CS2 with `-insecure`
+
+Output exe (Debug):
+
+```powershell
+DeployTool/bin/Debug/net10.0-windows/DeployTool.exe
+```
+
+**中文**
+
+先编译部署工具：
+
+```powershell
+dotnet build "DeployTool/DeployTool.csproj"
+```
+
+然后把你预编译好的 `OneManArmyPve.dll` 放到 `DeployTool.exe` 同目录，双击启动图形界面。
+
+界面只有两个按钮：
+
+- `安装`：自动定位 CS2 并复制 DLL
+- `启动 CS2（-insecure）`：用 `-insecure` 参数启动 CS2
+
+Debug 版 exe 路径：
+
+```powershell
+DeployTool/bin/Debug/net10.0-windows/DeployTool.exe
+```
+
+## Commands / 命令
+
+- `oma_enable [t|ct]` - enable mode and optionally set initial side / 开启模式并可选设置初始阵营
+- `oma_disable` - disable mode / 关闭模式
+- `oma_status` - show current mode status / 查看当前模式状态
