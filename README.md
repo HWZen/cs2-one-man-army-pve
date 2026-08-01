@@ -26,6 +26,24 @@ English and Chinese bilingual README for the standalone CounterStrikeSharp plugi
 - 竞技模式规则：12 局后换边、先到 13 胜、允许加时
 - 执行 `oma_enable` 时会同时开启 `sv_infinite_ammo 2`
 
+## Quick Start for Players / 普通用户使用教程
+
+**English**
+
+1. Install [CS2](https://store.steampowered.com/app/730/CounterStrike_2/) via Steam.
+2. Download the deploy tool executable from the [Releases](https://github.com/anomalyco/cs2-one-man-army-pve/releases) page.
+3. Run the deploy tool.
+4. Click `安装` (Install) to deploy the plugin.
+5. Click `启动 CS2` (Launch CS2) to start the game.
+
+**中文**
+
+1. 在 Steam 上下载好 [CS2](https://store.steampowered.com/app/730/CounterStrike_2/)。
+2. 从本项目的 [Releases 发布页](https://github.com/anomalyco/cs2-one-man-army-pve/releases) 下载本项目可执行程序。
+3. 启动部署工具。
+4. 点击 `安装` 部署插件。
+5. 点击 `启动 CS2` 启动游戏。
+
 ## Enhanced Bots (CS2-Bot-Improver) / 增强机器人（CS2-Bot-Improver）
 
 **English**
