@@ -26,6 +26,22 @@ English and Chinese bilingual README for the standalone CounterStrikeSharp plugi
 - 竞技模式规则：12 局后换边、先到 13 胜、允许加时
 - 执行 `oma_enable` 时会同时开启 `sv_infinite_ammo 2`
 
+## Enhanced Bots (CS2-Bot-Improver) / 增强机器人（CS2-Bot-Improver）
+
+**English**
+
+This project integrates the [CS2-Bot-Improver](https://github.com/ed0ard/CS2-Bot-Improver) enhancement project:
+
+- Uses CS2-Bot-Improver's **enhanced bots** (improved `botprofile.vpk` overrides) so the 10 bots play smarter and more realistically.
+- Uses CS2-Bot-Improver's **`gameinfo.gi`** config file in the CS2 `csgo` folder. It registers the `csgo/overrides/botprofile.vpk` and `csgo/addons/metamod` search paths, which is required for the enhanced bots to load and for CounterStrikeSharp plugins (including this one) to be usable.
+
+**中文**
+
+本项目集成了 [CS2-Bot-Improver](https://github.com/ed0ard/CS2-Bot-Improver) 增强项目：
+
+- 使用 CS2-Bot-Improver 的**增强机器人**（改进的 `botprofile.vpk` 覆盖文件），让 10 个人机玩得更聪明、更真实。
+- 使用 CS2-Bot-Improver 提供的 **`gameinfo.gi`** 配置文件，放置于 CS2 的 `csgo` 目录。该文件注册了 `csgo/overrides/botprofile.vpk` 和 `csgo/addons/metamod` 搜索路径，这是增强机器人能够加载、以及 CounterStrikeSharp 插件（包括本插件）能够使用的前提。
+
 ## Project Structure / 项目结构
 
 - `OneManArmyPve/OneManArmyPve.cs` - plugin source / 插件源码
