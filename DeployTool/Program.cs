@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
 namespace DeployTool;
@@ -81,7 +83,7 @@ internal sealed class MainForm : Form
 
         _launchButton = new Button
         {
-            Text = "启动 CS2（-insecure）",
+            Text = "启动 CS2（含 -insecure）",
             Font = new Font("Microsoft YaHei UI", 10, FontStyle.Bold),
             Size = new Size(230, 44),
             Location = new Point(270, 52)
@@ -368,10 +370,11 @@ internal sealed class MainForm : Form
             if (!CopyGameInfo(cs2Path, WithBotsGameInfoPath, "启用 Bots", remindOnMissing: true))
                 return;
 
+            string arguments = BuildCs2Arguments();
             var startInfo = new ProcessStartInfo
             {
                 FileName = cs2Exe,
-                Arguments = "-insecure",
+                Arguments = arguments,
                 WorkingDirectory = Path.GetDirectoryName(cs2Exe)!,
                 UseShellExecute = true
             };
@@ -387,8 +390,8 @@ internal sealed class MainForm : Form
             _runningCs2 = process;
             _launchButton.Enabled = false;
             _launchButton.Text = "CS2 运行中...";
-            _statusLabel.Text = "已启动 CS2（-insecure），退出后自动恢复 gameinfo.gi";
-            Log("已启动 CS2（-insecure），退出后自动恢复 gameinfo.gi");
+            _statusLabel.Text = $"已启动 CS2（参数：{arguments}），退出后自动恢复 gameinfo.gi";
+            Log($"已启动 CS2（参数：{arguments}），退出后自动恢复 gameinfo.gi");
 
             _ = Task.Run(() => WatchCs2AndRestore(process, cs2Path));
         }
@@ -402,6 +405,131 @@ internal sealed class MainForm : Form
             Cursor = Cursors.Default;
             _installButton.Enabled = true;
         }
+    }
+
+    // ── CS2 启动参数 ──────────────────────────────────────
+
+    private static string BuildCs2Arguments()
+    {
+        string existing = GetCs2LaunchOptions() ?? "";
+        bool hasInsecure = Regex.IsMatch(existing, @"(^|\s)-insecure($|\s)", RegexOptions.IgnoreCase);
+        if (hasInsecure) return existing.Trim();
+        return (existing.Trim() + " -insecure").Trim();
+    }
+
+    private static string? GetCs2LaunchOptions()
+    {
+        foreach (string root in GetSteamInstallRoots().Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            string? options = ReadLaunchOptionsFromSteamRoot(root);
+            if (!string.IsNullOrWhiteSpace(options)) return options;
+        }
+        return null;
+    }
+
+    private static string? ReadLaunchOptionsFromSteamRoot(string steamRoot)
+    {
+        string userDataDir = Path.Combine(steamRoot, "userdata");
+        if (!Directory.Exists(userDataDir)) return null;
+
+        foreach (string userDir in Directory.GetDirectories(userDataDir))
+        {
+            string configPath = Path.Combine(userDir, "config", "localconfig.vdf");
+            if (!File.Exists(configPath)) continue;
+
+            try
+            {
+                var root = ParseVdf(File.ReadAllText(configPath));
+                string[] path =
+                {
+                    "UserLocalConfigStore", "Software", "Valve", "Steam", "apps", "730", "LaunchOptions"
+                };
+                if (TryGetVdfString(root, path, out string? options) && !string.IsNullOrWhiteSpace(options))
+                {
+                    return options.Trim();
+                }
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
+        return null;
+    }
+
+    private static bool TryGetVdfString(Dictionary<string, object?> vdf, string[] path, out string? value)
+    {
+        value = null;
+        object? node = vdf;
+        foreach (string key in path)
+        {
+            if (node is not Dictionary<string, object?> dict)
+                return false;
+            string? found = dict.Keys.FirstOrDefault(k => k.Equals(key, StringComparison.OrdinalIgnoreCase));
+            if (found == null || !dict.TryGetValue(found, out node))
+                return false;
+        }
+        if (node is not string s) return false;
+        value = s;
+        return true;
+    }
+
+    private static Dictionary<string, object?> ParseVdf(string text)
+    {
+        var root = new Dictionary<string, object?>();
+        int pos = 0;
+        ParseVdfBlock(text, ref pos, root);
+        return root;
+    }
+
+    private static void ParseVdfBlock(string text, ref int pos, Dictionary<string, object?> target)
+    {
+        while (pos < text.Length)
+        {
+            SkipVdfWhitespace(text, ref pos);
+            if (pos >= text.Length) break;
+            if (text[pos] == '}')
+            {
+                pos++;
+                return;
+            }
+
+            string key = ReadVdfToken(text, ref pos);
+            SkipVdfWhitespace(text, ref pos);
+            if (pos < text.Length && text[pos] == '{')
+            {
+                pos++;
+                var child = new Dictionary<string, object?>();
+                ParseVdfBlock(text, ref pos, child);
+                target[key] = child;
+            }
+            else
+            {
+                target[key] = ReadVdfToken(text, ref pos);
+            }
+        }
+    }
+
+    private static void SkipVdfWhitespace(string text, ref int pos)
+    {
+        while (pos < text.Length && char.IsWhiteSpace(text[pos])) pos++;
+    }
+
+    private static string ReadVdfToken(string text, ref int pos)
+    {
+        if (pos >= text.Length || text[pos] != '"') return "";
+        pos++;
+        var sb = new StringBuilder();
+        while (pos < text.Length && text[pos] != '"')
+        {
+            if (text[pos] == '\\' && pos + 1 < text.Length)
+                pos++;
+            sb.Append(text[pos]);
+            pos++;
+        }
+        pos++;
+        return sb.ToString();
     }
 
     // ── gameinfo.gi 切换 ──────────────────────────────────
@@ -471,7 +599,7 @@ internal sealed class MainForm : Form
             InvokeIfNeeded(() =>
             {
                 _launchButton.Enabled = true;
-                _launchButton.Text = "启动 CS2（-insecure）";
+                _launchButton.Text = "启动 CS2（含 -insecure）";
                 _statusLabel.Text = "CS2 已退出，已恢复 gameinfo.gi";
             });
         }

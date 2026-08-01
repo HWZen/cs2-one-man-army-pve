@@ -29,7 +29,7 @@
   "name": "OneManArmyPve",
   "files": [
     {
-      "from": "OneManArmyPve.dll",
+      "from": "OneManArmy/OneManArmyPve.dll",
       "to": "game/csgo/addons/counterstrikesharp/plugins/OneManArmyPve/"
     },
     {
