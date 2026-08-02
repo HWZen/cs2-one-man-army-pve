@@ -35,6 +35,7 @@ English and Chinese bilingual README for the standalone CounterStrikeSharp plugi
 3. Run the deploy tool.
 4. Click `安装` (Install) to deploy the plugin.
 5. Click `启动 CS2` (Launch CS2) to start the game.
+6. In the game, start a casual/competitive match against bots. During the team selection phase, open the console and type `oma t` or `oma ct` to enable the mode.
 
 **中文**
 
@@ -43,6 +44,7 @@ English and Chinese bilingual README for the standalone CounterStrikeSharp plugi
 3. 启动部署工具。
 4. 点击 `安装` 部署插件。
 5. 点击 `启动 CS2` 启动游戏。
+6. 进入游戏后，开始一局人机竞技，并在选边环节，打开控制台，输入 `oma t` 或 `oma ct` 开启模式。
 
 ## Enhanced Bots (CS2-Bot-Improver) / 增强机器人（CS2-Bot-Improver）
 
